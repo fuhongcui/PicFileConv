@@ -10,15 +10,15 @@
 #include <CTrace.h>
 using namespace Namspace_Trace;
 
+#define SYS_PAUSE do{ printf("Press Enter key to continue..."); fgetc(stdin);} while(0);
 #ifdef _WIN32
 static const std::string PATH_SEPARATOR = "\\";
-static const char* CLEAR = "cls";
-static const char* PAUSE = "pause";
+#define SYS_CLEAR do{ system("cls");} while(0);
 #else
 static const std::string PATH_SEPARATOR = "/";
-static const char* CLEAR = "clear";
-static const char* PAUSE = "pause";
+#define SYS_CLEAR do{ system("clear");} while(0);
 #endif
+
 const bool PixelToFile(std::string& strFileIn);
 const bool FileToPixel(std::string& strFileIn);
 int main(int argc, char* argv[])
@@ -37,38 +37,38 @@ int main(int argc, char* argv[])
 		{
 			while(true)
 			{
-				system(CLEAR);
+				SYS_CLEAR
 				std::string strFileIn("");
 				std::cout << "Pixel -> File" << std::endl;
 				std::cout << "Input picture file path:" << std::endl;
 				std::getline(std::cin, strFileIn);
 				if(!PixelToFile(strFileIn))
 				{
-					system(PAUSE);
+					SYS_PAUSE
 					continue;
 				}
-				system(PAUSE);
+				SYS_PAUSE
 				return 0;
 			}
 		}
 		else if(strInput == "2")
 		{
-			system(CLEAR);
+			SYS_CLEAR
 			std::string strFileIn("");
 			std::cout << "File -> Pixel" << std::endl;
 			std::cout << "Input pixel text file path:" << std::endl;
 			std::getline(std::cin, strFileIn);
 			if(!FileToPixel(strFileIn))
 			{
-				system(PAUSE);
+				SYS_PAUSE
 				continue;
 			}
-			system(PAUSE);
+			SYS_PAUSE
 			return 0;
 		}
 		else
 		{
-			system(CLEAR);
+			SYS_CLEAR
 			continue;
 		}
 	}
@@ -124,7 +124,7 @@ const bool PixelToFile(std::string& strFileIn)
 		TraceLevel(LOG_ERROR, "FILE = [%s] open failed", strFileOut);
 		return false;
 	}
-	TraceLevel(LOG_INFO, "------------------- Begin write text file -------------------");
+	TraceLevel(LOG_INFO, "------------------- Begin write text file -------------------", "");
 	TraceLevel(LOG_INFO, "Picture info = [width = %d, height = %d, bit = %d]", width, height, nrChannels);
 	TraceLevel(LOG_INFO, "[%s] ======> [%s] ", strFileIn.c_str(), strFileOut.c_str());
 	char buf[9];
@@ -160,7 +160,7 @@ const bool PixelToFile(std::string& strFileIn)
 	}
 	oFile.flush();
 	oFile.close();
-	TraceLevel(LOG_INFO, "------------------- End write text file -------------------");
+	TraceLevel(LOG_INFO, "------------------- End write text file -------------------", "");
 	stbi_image_free(data);
 	return true;
 }
