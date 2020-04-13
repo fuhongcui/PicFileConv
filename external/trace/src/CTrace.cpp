@@ -41,10 +41,18 @@ void CTrace::Destroy()
 }
 std::string CTrace::GetCurrTime()
 {
-	time_t tt = time(NULL);
-	tm* t = localtime(&tt);
+	time_t time_seconds = time(0);
+	struct tm t;
+#ifdef _WIN32
+	localtime_s(&t, &time_seconds);
+#else
+	localtime_r(&time_seconds, &t);
+#endif
 	char temp[256] = { 0 };
-	sprintf(temp,"%d-%02d-%02d %02d:%02d:%02d", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+
+
+
+	snprintf(temp, sizeof(temp), "%d-%02d-%02d %02d:%02d:%02d", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 	char* ch = temp;
 	return ch;
 }
@@ -74,7 +82,7 @@ const bool CTrace::Init(const std::string& strLogFile)
 		}
 		
 	}
-	m_file.open(strLogFile, std::ios::out);
+	m_file.open(strLogFile, std::ios::out | std::ios::app);
 	if (m_file.is_open())
 	{
 		m_strfilePath = strLogFile;
