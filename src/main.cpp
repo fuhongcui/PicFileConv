@@ -21,6 +21,8 @@ static const std::string PATH_SEPARATOR = "/";
 
 const bool PixelToFile(std::string& strFileIn);
 const bool FileToPixel(std::string& strFileIn);
+
+std::vector<std::string> Split(const std::string& str, const std::string& delim);
 int main(int argc, char* argv[])
 {
 	
@@ -32,7 +34,7 @@ int main(int argc, char* argv[])
 		std::cout << "2.File -> Pixel" << std::endl;
 		std::cout << "----------------------" << std::endl;
 		std::string strInput;
-		std::getline(std::cin, strInput);
+		//std::getline(std::cin, strInput);
 		if(strInput == "1")
 		{
 			while(true)
@@ -51,13 +53,14 @@ int main(int argc, char* argv[])
 				return 0;
 			}
 		}
-		else if(strInput == "2")
+		else if(1/*strInput == "2"*/)
 		{
 			SYS_CLEAR
 			std::string strFileIn("");
 			std::cout << "File -> Pixel" << std::endl;
 			std::cout << "Input pixel text file path:" << std::endl;
-			std::getline(std::cin, strFileIn);
+			//std::getline(std::cin, strFileIn);
+			strFileIn = "D:\\CFH\\CFH\\PicFileConv\\bin\\c_Pix.txt";
 			if(!FileToPixel(strFileIn))
 			{
 				SYS_PAUSE
@@ -107,7 +110,7 @@ const bool PixelToFile(std::string& strFileIn)
 			strFileOut = strFileIn.substr(PosBegin);
 		}
 	}
-	strFileOut += "_Pix.txt";
+	strFileOut += ".pix.txt";
 	int width = 0;
 	int height = 0;
 	int nrChannels = 0;
@@ -166,21 +169,130 @@ const bool PixelToFile(std::string& strFileIn)
 }
 const bool FileToPixel(std::string& strFileIn)
 {
-	std::ifstream iFile(strFileIn);
-	iFile.open(strFileIn);
+	std::ifstream iFile(strFileIn);;
 	if(!iFile.is_open())
 	{
 		TraceLevel(LOG_ERROR, "Text pix file = [%s] load failed", strFileIn.c_str());
 		return false;
 	}
 	std::vector<std::string> vecBuffer;
-	std::string strLine = "";
+	unsigned int uiWidth = 0;
+	unsigned int uiHeight = 0;
+	bool bWidthValid = true;
+	unsigned int uiLineIndx = 0; 
 	while(!iFile.eof())
 	{
+		std::string strLine = "";
 		std::getline(iFile, strLine);
+		unsigned int uiCurrentWidth = static_cast<unsigned int>(strLine.size());
+		if(uiWidth == 0)
+		{
+			uiWidth = uiCurrentWidth;
+		}
+		else
+		{
+			if(uiWidth != uiCurrentWidth)
+			{
+				TraceLevel(LOG_ERROR, "Text pix file = [%s] line = %d width invalid", strFileIn.c_str(), uiLineIndx);
+				bWidthValid = false;
+				break;
+			}
+		}
 		vecBuffer.push_back(strLine);
-		std::cout << strLine.size() << std::endl;
+		++uiLineIndx;
+	}
+	iFile.close();
+	if(!bWidthValid)
+	{
+		TraceLevel(LOG_ERROR, "Text pix file = [%s] width invalid", strFileIn.c_str());
+		return false;
+	}
+	std::vector< std::vector<std::string> > vv;
+	vv.resize(vecBuffer.size());
+	for(int iHeight = 0; iHeight < vecBuffer.size(); ++iHeight)
+	{
+		std::string& strLine = vecBuffer[iHeight];
+		std::vector<std::string> vecSplitLine = Split(strLine, "0x");
+		if(vecSplitLine.empty())
+		{
+			continue;
+		}
+		vv[iHeight] = vecSplitLine;
+	}
+	if(vv.empty() || vv[0].empty())
+	{
+		TraceLevel(LOG_ERROR, "Text pix file = [%s] parse failed", strFileIn.c_str());
+		return false;
+	}
+	unsigned int uiWriteWidth = vv[0].size();
+	unsigned int uiWriteHeight = vv.size();
+	unsigned int uiWriteBitCount = static_cast<unsigned int>(vv[0][0].length() / 2);
+	unsigned char* pData = new unsigned char[uiWriteWidth*uiWriteHeight*uiWriteBitCount];
+	for(unsigned int HeightIndex = 0; HeightIndex < uiWriteHeight; ++HeightIndex)
+	{
+		for(unsigned int WidthIndex = 0; WidthIndex < uiWriteWidth; ++WidthIndex)
+		{
+			std::string strPix = "0x" + vv[HeightIndex][WidthIndex];
+			unsigned int uiPix = static_cast<unsigned int>(std::stoi(strPix, nullptr, 16));
+			memcpy(pData + (HeightIndex * uiWriteWidth + WidthIndex) * uiWriteBitCount, (void*)&uiPix, uiWriteBitCount);
+		}
+	}
+	std::string strFileOut = "";
+	std::string::size_type PosBegin = strFileIn.find_last_of(PATH_SEPARATOR);
+	std::string::size_type PosEnd = strFileIn.find_last_of(".");
+	if(PosBegin == std::string::npos)
+	{
+		if(PosEnd != std::string::npos)
+		{
+			strFileOut = strFileIn.substr(0, PosEnd);
+		}
+		else
+		{
+			strFileOut = strFileIn;
+		}
+	}
+	else
+	{
+		if(PosEnd != std::string::npos)
+		{
+			strFileOut = strFileIn.substr(PosBegin + 1, PosEnd - PosBegin - 1);
+		}
+		else
+		{
+			strFileOut = strFileIn.substr(PosBegin);
+		}
+	}
+	strFileOut += "_pix2pic";
+	if(uiWriteBitCount == 3)
+	{
+		strFileOut += ".jpg";
+		stbi_write_jpg(strFileOut.c_str(), uiWriteWidth, uiWriteHeight, uiWriteBitCount, (void*)pData, 0);
+	}
+	else if(uiWriteBitCount == 4)
+	{
+		strFileOut += ".png";
+		stbi_write_png(strFileOut.c_str(), uiWriteWidth, uiWriteHeight, uiWriteBitCount, (void*)pData, 0);
+	}
+	else
+	{
+		/* code */
 	}
 	
+	delete[] pData;
 	return true;
+}
+std::vector<std::string> Split(const std::string& str, const std::string& delim)
+{
+    std::vector<std::string> tokens;
+    std::size_t prev = 0, pos = 0;
+    do
+    {
+        pos = str.find(delim, prev);
+        if (pos == std::string::npos) pos = str.length();
+        std::string token = str.substr(prev, pos-prev);
+        if (!token.empty()) tokens.push_back(token);
+        prev = pos + delim.length();
+    }
+    while (pos < str.length() && prev < str.length());
+    return tokens;
 }
