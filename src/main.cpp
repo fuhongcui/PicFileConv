@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 }
 const bool Picture2Text(std::string& strFileIn)
 {
-	TraceLevel(LOG_INFO, "------------------- Begin read picture file -------------------", "");
+	TraceLevel(LOG_INFO, "Begin read picture file", "");
 	int width = 0;
 	int height = 0;
 	int nrChannels = 0;
@@ -97,6 +97,7 @@ const bool Picture2Text(std::string& strFileIn)
 		TraceLevel(LOG_ERROR, "Picture = [%s] load failed, please check out your input file path", strFileIn.c_str());
 		return false;
 	}
+	TraceLevel(LOG_INFO, "Picture = [%s] width = %d  height = %d bit = %d", strFileIn.c_str(), width, height, nrChannels);
 	std::string strFileOut("");
 	std::string::size_type PosBegin = strFileIn.find_last_of(PATH_SEPARATOR);
 	std::string::size_type PosEnd = strFileIn.find_last_of(".");
@@ -130,9 +131,8 @@ const bool Picture2Text(std::string& strFileIn)
 		TraceLevel(LOG_ERROR, "Output file = [%s] open failed", strFileOut);
 		return false;
 	}
-	TraceLevel(LOG_INFO, "------------------- End read picture file -------------------", "");
-	TraceLevel(LOG_INFO, "------------------- Begin write text file -------------------", "");
-	TraceLevel(LOG_INFO, "Picture info = [width = %d, height = %d, bit = %d]", width, height, nrChannels);
+	TraceLevel(LOG_INFO, "End read picture file", "");
+	TraceLevel(LOG_INFO, "Begin write text file", "");
 	TraceLevel(LOG_INFO, "[%s] ======> [%s] ", strFileIn.c_str(), strFileOut.c_str());
 	char buf[128];
 	for (int i = 0; i < height; ++i)
@@ -165,14 +165,14 @@ const bool Picture2Text(std::string& strFileIn)
 	}
 	oFile.flush();
 	oFile.close();
-	TraceLevel(LOG_INFO, "------------------- End write text file -------------------", "");
+	TraceLevel(LOG_INFO, "End write text file", "");
 	stbi_image_free(data);
 	return true;
 }
 const bool Text2Picture(std::string& strFileIn)
 {
-	TraceLevel(LOG_INFO, "------------------- Begin read text file -------------------", "");
-	TraceLevel(LOG_INFO, "Text file = [%s]", strFileIn.c_str());
+	TraceLevel(LOG_INFO, "Begin read text file", "");
+	TraceLevel(LOG_INFO, "Text = [%s]", strFileIn.c_str());
 	std::ifstream iFile(strFileIn);;
 	if(!iFile.is_open())
 	{
@@ -202,7 +202,7 @@ const bool Text2Picture(std::string& strFileIn)
 		{
 			if(uiWidth != uiCurrentWidth)
 			{
-				TraceLevel(LOG_ERROR, "Text file = [%s] line = %d width invalid", strFileIn.c_str(), uiLineIndx);
+				TraceLevel(LOG_ERROR, "Text = [%s] line = %d width invalid", strFileIn.c_str(), uiLineIndx);
 				bWidthValid = false;
 				break;
 			}
@@ -213,7 +213,7 @@ const bool Text2Picture(std::string& strFileIn)
 	iFile.close();
 	if(!bWidthValid)
 	{
-		TraceLevel(LOG_ERROR, "Text file = [%s] width invalid", strFileIn.c_str());
+		TraceLevel(LOG_ERROR, "Text = [%s] width invalid", strFileIn.c_str());
 		return false;
 	}
 	std::vector< std::vector<std::string> > vv;
@@ -234,16 +234,16 @@ const bool Text2Picture(std::string& strFileIn)
 		}
 		if(szLineWith != szCurrentLineWith)
 		{
-			TraceLevel(LOG_ERROR, "Text file = [%s] line = [%u] width = [%u] invalid", strFileIn.c_str(), iHeight, szCurrentLineWith);
+			TraceLevel(LOG_ERROR, "Text = [%s] line = [%u] width = [%u] invalid", strFileIn.c_str(), iHeight, szCurrentLineWith);
 		}
 		vv[iHeight] = vecSplitLine;
 	}
 	if(vv.empty() || vv[0].empty())
 	{
-		TraceLevel(LOG_ERROR, "Text file = [%s] parse failed", strFileIn.c_str());
+		TraceLevel(LOG_ERROR, "Text = [%s] parse failed, please check it", strFileIn.c_str());
 		return false;
 	}
-	TraceLevel(LOG_INFO, "------------------- End read text file -------------------", "");
+	TraceLevel(LOG_INFO, "End read text file", "");
 	unsigned int uiWriteWidth = vv[0].size();
 	unsigned int uiWriteHeight = vv.size();
 	unsigned int uiWriteBitCount = static_cast<unsigned int>(vv[0][0].length() / 2);
@@ -285,8 +285,8 @@ const bool Text2Picture(std::string& strFileIn)
 	{
 		/* code */
 	}
-	TraceLevel(LOG_INFO, "------------------- Begin write picture file -------------------", "");
-	TraceLevel(LOG_INFO, "Picture info = [width = %d, height = %d, bit = %d]", uiWriteWidth, uiWriteHeight, uiWriteBitCount);
+	TraceLevel(LOG_INFO, "Begin write picture file", "");
+	TraceLevel(LOG_INFO, "Picture = [width = %d, height = %d, bit = %d]", uiWriteWidth, uiWriteHeight, uiWriteBitCount);
 	TraceLevel(LOG_INFO, "[%s] ======> [%s] ", strFileIn.c_str(), strFileOut.c_str());
 	unsigned char* pData = new unsigned char[uiWriteWidth*uiWriteHeight*uiWriteBitCount];
 	if(!pData)
@@ -316,7 +316,7 @@ const bool Text2Picture(std::string& strFileIn)
 		/* code */
 	}
 	delete[] pData;
-	TraceLevel(LOG_INFO, "------------------- End write picture file -------------------", "");
+	TraceLevel(LOG_INFO, "End write picture file", "");
 	return true;
 }
 std::vector<std::string> Split(const std::string& str, const std::string& delim)
