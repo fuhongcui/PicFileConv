@@ -30,14 +30,9 @@ std::string GetFileName(std::string& strFileIn);
 int main(int argc, char* argv[])
 {
 	std::string strTrace = "trace.log";
-	if(argc > 0) 
-	{
-		std::string strExe = argv[0];
-		strTrace = GetFileName(strExe) + ".log";
-	}
+	if(argc > 0) strTrace = GetFileName(std::string(argv[0])) + ".log";
 	CTrace::Instance()->Init(strTrace);
-	if(argc < 2)
-	ExecMenu();
+	if(argc < 2) ExecMenu();
 	else ExecCommand(argc, argv);
     CTrace::Instance()->Destroy();
     return 0;
