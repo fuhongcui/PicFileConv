@@ -134,10 +134,6 @@ const bool Picture2Text(std::string& strFileIn)
 	char buf[128];
 	for (int i = 0; i < height; ++i)
 	{
-		if (i != 0)
-		{
-			oFile << std::endl;
-		}
 		for (int j = 0; j < width; ++j)
 		{
 			memset(buf, 0x0, sizeof(buf));
@@ -146,14 +142,18 @@ const bool Picture2Text(std::string& strFileIn)
 				if (nrChannels == 3)
 				{
 					unsigned int uiPixVal = *uiPix & 0x00ffffff;
-					snprintf(buf, sizeof(buf),"0x%06X", uiPixVal);
+					if(j == 0) snprintf(buf, sizeof(buf), "0x%06X", uiPixVal);
+					else if(j == (width - 1)) snprintf(buf, sizeof(buf), "\t0x%06X\n", uiPixVal);
+					else snprintf(buf, sizeof(buf), "\t0x%06X", uiPixVal);
 					oFile << buf;
 					
 				}
 			if (nrChannels == 4)
 			{
 				unsigned int uiPixVal = *uiPix;
-				snprintf(buf, sizeof(buf), "0x%08X", uiPixVal);
+				if (j == 0) snprintf(buf, sizeof(buf), "0x%08X", uiPixVal);
+				else if (j == (width - 1)) snprintf(buf, sizeof(buf), "\t0x%08X\n", uiPixVal);
+				else snprintf(buf, sizeof(buf), "\t0x%08X", uiPixVal);
 				oFile << buf;
 			}
 			else
@@ -189,6 +189,10 @@ const bool Text2Picture(std::string& strFileIn)
 		std::string strLine = "";
 		std::getline(iFile, strLine);
 		unsigned int uiCurrentWidth = static_cast<unsigned int>(strLine.size());
+		if (uiCurrentWidth == 0)
+		{
+			continue;
+		}
 		if(uiWidth == 0)
 		{
 			uiWidth = uiCurrentWidth;
