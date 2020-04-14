@@ -21,12 +21,22 @@ static const std::string PATH_SEPARATOR = "/";
 
 const bool Picture2Text(std::string& strFileIn);
 const bool Text2Picture(std::string& strFileIn);
-
+void  ExecMenu();
+void  ExecCommand(int argc, char* argv[]);
 std::vector<std::string> Split(const std::string& str, const std::string& delim);
+
 int main(int argc, char* argv[])
 {
 	
 	CTrace::Instance()->Init("trace.txt");
+	if(argc < 2)
+	ExecMenu();
+	else ExecCommand(argc, argv);
+    CTrace::Instance()->Destroy();
+    return 0;
+}
+void  ExecMenu()
+{
 	while(true)
 	{
 		std::cout << "----------------------" << std::endl;
@@ -82,8 +92,42 @@ int main(int argc, char* argv[])
 			continue;
 		}
 	}
-    CTrace::Instance()->Destroy();
-    return 0;
+}
+void  ExecCommand(int argc, char* argv[])
+{
+	std::string strText("");
+	std::string strPicture("");
+	for(int i = 1; i < argc; ++i)
+	{
+		std::string strVar = argv[i];
+		if(strVar == "-t2p" && ((i + 1) < argc))
+		{
+			strText = argv[i + 1];
+		}
+		else if(strVar == "-p2t" && ((i + 1) < argc))
+		{
+			strPicture = argv[i + 1];
+		}
+		else
+		{
+			/* no */
+		}
+	}
+	if(strText.empty() && strPicture.empty())
+	{
+		std::cout << "Usage:" << std::endl;
+		std::cout << "Picture To Text:\t" << argv[0] << " -p2t " << "picture file path" << std::endl;
+		std::cout << "Text To Picture:\t" << argv[0] << " -t2p " << "text file path" << std::endl;
+	}
+	if(!strPicture.empty())
+	{
+		(void)Picture2Text(strPicture);
+	}
+	if(!strText.empty())
+	{
+		(void)Text2Picture(strText);
+	}
+	return;
 }
 const bool Picture2Text(std::string& strFileIn)
 {
