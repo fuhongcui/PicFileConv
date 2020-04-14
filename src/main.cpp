@@ -32,6 +32,7 @@ int main(int argc, char* argv[])
 		std::cout << "----------------------" << std::endl;
 		std::cout << "1.Picture -> Text" << std::endl;
 		std::cout << "2.Text -> Picture" << std::endl;
+		std::cout << "3.Exit" << std::endl;
 		std::cout << "----------------------" << std::endl;
 		std::string strInput;
 		std::getline(std::cin, strInput);
@@ -71,29 +72,37 @@ int main(int argc, char* argv[])
 				break;
 			}
 		}
+		else if (strInput == "3")
+		{
+			break;
+		}
 		else
 		{
 			SYS_CLEAR
 			continue;
 		}
 	}
-	CTrace::Instance()->Destroy();
+    CTrace::Instance()->Destroy();
     return 0;
 }
 const bool Picture2Text(std::string& strFileIn)
 {
 	TraceLevel(LOG_INFO, "------------------- Begin read picture file -------------------", "");
-	std::string strFileOut("");
-	if(strFileIn.empty())
+	int width = 0;
+	int height = 0;
+	int nrChannels = 0;
+	unsigned char* data = stbi_load(strFileIn.c_str(), &width, &height, &nrChannels, 0);
+	if (!data)
 	{
-		TraceLevel(LOG_ERROR, "Picture = [%s] load failed", strFileIn.c_str());
+		TraceLevel(LOG_ERROR, "Picture = [%s] load failed, please check out your input file path", strFileIn.c_str());
 		return false;
 	}
+	std::string strFileOut("");
 	std::string::size_type PosBegin = strFileIn.find_last_of(PATH_SEPARATOR);
 	std::string::size_type PosEnd = strFileIn.find_last_of(".");
-	if(PosBegin == std::string::npos)
+	if (PosBegin == std::string::npos)
 	{
-		if(PosEnd != std::string::npos)
+		if (PosEnd != std::string::npos)
 		{
 			strFileOut = strFileIn.substr(0, PosEnd);
 		}
@@ -104,7 +113,7 @@ const bool Picture2Text(std::string& strFileIn)
 	}
 	else
 	{
-		if(PosEnd != std::string::npos)
+		if (PosEnd != std::string::npos)
 		{
 			strFileOut = strFileIn.substr(PosBegin + 1, PosEnd - PosBegin - 1);
 		}
@@ -114,20 +123,11 @@ const bool Picture2Text(std::string& strFileIn)
 		}
 	}
 	strFileOut += "_text.txt";
-	int width = 0;
-	int height = 0;
-	int nrChannels = 0;
-	unsigned char* data = stbi_load(strFileIn.c_str(), &width, &height, &nrChannels, 0);
-	if (!data)
-	{
-		TraceLevel(LOG_ERROR, "Picture = [%s] load failed", strFileIn.c_str());
-		return false;
-	}
 	std::ofstream oFile;
 	oFile.open(strFileOut, std::ios::ate | std::ios::out);
 	if (!oFile.is_open())
 	{
-		TraceLevel(LOG_ERROR, "FILE = [%s] open failed", strFileOut);
+		TraceLevel(LOG_ERROR, "Output file = [%s] open failed", strFileOut);
 		return false;
 	}
 	TraceLevel(LOG_INFO, "------------------- End read picture file -------------------", "");
@@ -145,18 +145,16 @@ const bool Picture2Text(std::string& strFileIn)
 				if (nrChannels == 3)
 				{
 					unsigned int uiPixVal = *uiPix & 0x00ffffff;
-					if(j == 0) snprintf(buf, sizeof(buf), "0x%06X", uiPixVal);
-					else if(j == (width - 1)) snprintf(buf, sizeof(buf), "\t0x%06X\n", uiPixVal);
-					else snprintf(buf, sizeof(buf), "\t0x%06X", uiPixVal);
+					if(j == (width - 1)) snprintf(buf, sizeof(buf), "0x%06X\n", uiPixVal);
+					else snprintf(buf, sizeof(buf), "0x%06X\t", uiPixVal);
 					oFile << buf;
 					
 				}
 			if (nrChannels == 4)
 			{
 				unsigned int uiPixVal = *uiPix;
-				if (j == 0) snprintf(buf, sizeof(buf), "0x%08X", uiPixVal);
-				else if (j == (width - 1)) snprintf(buf, sizeof(buf), "\t0x%08X\n", uiPixVal);
-				else snprintf(buf, sizeof(buf), "\t0x%08X", uiPixVal);
+				if (j == (width - 1)) snprintf(buf, sizeof(buf), "0x%08X\n", uiPixVal);
+				else snprintf(buf, sizeof(buf), "0x%08X\t", uiPixVal);
 				oFile << buf;
 			}
 			else
@@ -178,7 +176,7 @@ const bool Text2Picture(std::string& strFileIn)
 	std::ifstream iFile(strFileIn);;
 	if(!iFile.is_open())
 	{
-		TraceLevel(LOG_ERROR, "Text file = [%s] load failed", strFileIn.c_str());
+		TraceLevel(LOG_ERROR, "Text = [%s] load failed, please check out your input file path", strFileIn.c_str());
 		return false;
 	}
 	std::vector<std::string> vecBuffer;
