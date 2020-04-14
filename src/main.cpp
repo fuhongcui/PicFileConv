@@ -19,16 +19,23 @@ static const std::string PATH_SEPARATOR = "/";
 #define SYS_CLEAR do{ system("clear");} while(0);
 #endif
 
-const bool Picture2Text(std::string& strFileIn);
-const bool Text2Picture(std::string& strFileIn);
 void  ExecMenu();
 void  ExecCommand(int argc, char* argv[]);
+const bool Picture2Text(std::string& strFileIn);
+const bool Text2Picture(std::string& strFileIn);
+
 std::vector<std::string> Split(const std::string& str, const std::string& delim);
+std::string GetFileName(std::string& strFileIn);
 
 int main(int argc, char* argv[])
 {
-	
-	CTrace::Instance()->Init("trace.txt");
+	std::string strTrace = "trace.log";
+	if(argc > 0) 
+	{
+		std::string strExe = argv[0];
+		strTrace = GetFileName(strExe) + ".log";
+	}
+	CTrace::Instance()->Init(strTrace);
 	if(argc < 2)
 	ExecMenu();
 	else ExecCommand(argc, argv);
@@ -143,31 +150,7 @@ const bool Picture2Text(std::string& strFileIn)
 		return false;
 	}
 	TraceLevel(LOG_INFO, "Picture = [%s] width = %d  height = %d bit = %d", strFileIn.c_str(), width, height, nrChannels);
-	std::string strFileOut("");
-	std::string::size_type PosBegin = strFileIn.find_last_of(PATH_SEPARATOR);
-	std::string::size_type PosEnd = strFileIn.find_last_of(".");
-	if (PosBegin == std::string::npos)
-	{
-		if (PosEnd != std::string::npos)
-		{
-			strFileOut = strFileIn.substr(0, PosEnd);
-		}
-		else
-		{
-			strFileOut = strFileIn;
-		}
-	}
-	else
-	{
-		if (PosEnd != std::string::npos)
-		{
-			strFileOut = strFileIn.substr(PosBegin + 1, PosEnd - PosBegin - 1);
-		}
-		else
-		{
-			strFileOut = strFileIn.substr(PosBegin);
-		}
-	}
+	std::string strFileOut = GetFileName(strFileIn);
 	strFileOut += "_text.txt";
 	std::ofstream oFile;
 	oFile.open(strFileOut, std::ios::ate | std::ios::out);
@@ -292,31 +275,7 @@ const bool Text2Picture(std::string& strFileIn)
 	unsigned int uiWriteWidth = vv[0].size();
 	unsigned int uiWriteHeight = vv.size();
 	unsigned int uiWriteBitCount = static_cast<unsigned int>(vv[0][0].length() / 2);
-	std::string strFileOut = "";
-	std::string::size_type PosBegin = strFileIn.find_last_of(PATH_SEPARATOR);
-	std::string::size_type PosEnd = strFileIn.find_last_of(".");
-	if(PosBegin == std::string::npos)
-	{
-		if(PosEnd != std::string::npos)
-		{
-			strFileOut = strFileIn.substr(0, PosEnd);
-		}
-		else
-		{
-			strFileOut = strFileIn;
-		}
-	}
-	else
-	{
-		if(PosEnd != std::string::npos)
-		{
-			strFileOut = strFileIn.substr(PosBegin + 1, PosEnd - PosBegin - 1);
-		}
-		else
-		{
-			strFileOut = strFileIn.substr(PosBegin);
-		}
-	}
+	std::string strFileOut = GetFileName(strFileIn);
 	strFileOut += "_picture";
 	if(uiWriteBitCount == 3)
 	{
@@ -378,4 +337,33 @@ std::vector<std::string> Split(const std::string& str, const std::string& delim)
     }
     while (pos < str.length() && prev < str.length());
     return tokens;
+}
+std::string GetFileName(std::string& strFileIn)
+{
+	std::string strFileOut("");
+	std::string::size_type PosBegin = strFileIn.find_last_of(PATH_SEPARATOR);
+	std::string::size_type PosEnd = strFileIn.find_last_of(".");
+	if (PosBegin == std::string::npos)
+	{
+		if (PosEnd != std::string::npos)
+		{
+			strFileOut = strFileIn.substr(0, PosEnd);
+		}
+		else
+		{
+			strFileOut = strFileIn;
+		}
+	}
+	else
+	{
+		if (PosEnd != std::string::npos)
+		{
+			strFileOut = strFileIn.substr(PosBegin + 1, PosEnd - PosBegin - 1);
+		}
+		else
+		{
+			strFileOut = strFileIn.substr(PosBegin);
+		}
+	}
+	return strFileOut;
 }
