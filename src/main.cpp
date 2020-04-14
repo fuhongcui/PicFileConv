@@ -50,23 +50,26 @@ int main(int argc, char* argv[])
 					continue;
 				}
 				SYS_PAUSE
-				return 0;
+				break;
 			}
 		}
 		else if(strInput == "2")
 		{
-			SYS_CLEAR
-			std::string strFileIn("");
-			std::cout << "Text -> Picture" << std::endl;
-			std::cout << "Input Text File Path:" << std::endl;
-			std::getline(std::cin, strFileIn);
-			if(!Text2Picture(strFileIn))
+			while (true)
 			{
+				SYS_CLEAR
+				std::string strFileIn("");
+				std::cout << "Text -> Picture" << std::endl;
+				std::cout << "Input Text File Path:" << std::endl;
+				std::getline(std::cin, strFileIn);
+				if (!Text2Picture(strFileIn))
+				{
+					SYS_PAUSE
+					continue;
+				}
 				SYS_PAUSE
-				continue;
+				break;
 			}
-			SYS_PAUSE
-			return 0;
 		}
 		else
 		{
