@@ -146,7 +146,7 @@ const bool Picture2Text(std::string& strFileIn)
 	}
 	TraceLevel(LOG_INFO, "Picture = [%s] width = %d  height = %d bit = %d", strFileIn.c_str(), width, height, nrChannels);
 	std::string strFileOut = GetFileName(strFileIn);
-	strFileOut += ".p2t.txt";
+	strFileOut += "__Pic2Txt__.txt";
 	std::ofstream oFile;
 	oFile.open(strFileOut, std::ios::ate | std::ios::out);
 	if (!oFile.is_open())
@@ -271,7 +271,7 @@ const bool Text2Picture(std::string& strFileIn)
 	unsigned int uiWriteHeight = vv.size();
 	unsigned int uiWriteBitCount = static_cast<unsigned int>(vv[0][0].length() / 2);
 	std::string strFileOut = GetFileName(strFileIn);
-	strFileOut += ".t2p";
+	strFileOut += "__Txt2Pic__";
 	if(uiWriteBitCount == 3)
 	{
 		strFileOut += ".jpg";
