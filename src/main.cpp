@@ -116,8 +116,9 @@ void  ExecCommand(int argc, char* argv[])
 	if(strText.empty() && strPicture.empty())
 	{
 		std::cout << "Usage:" << std::endl;
-		std::cout << "Picture To Text:\t" << argv[0] << " -p2t " << "picture file path" << std::endl;
-		std::cout << "Text To Picture:\t" << argv[0] << " -t2p " << "text file path" << std::endl;
+		std::cout << "Picture To Text:\t" << argv[0] << " -p2t " << "Picture" << std::endl;
+		std::cout << "Text To Picture:\t" << argv[0] << " -t2p " << "Text" << std::endl;
+		return;
 	}
 	if(!strPicture.empty())
 	{
